@@ -2,11 +2,9 @@
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text.RegularExpressions;
-//var html = await Load("https://translate.google.co.il/?hl=iw&sl=en&tl=iw&op=translate");
-//var cleanHtml = new Regex("//s").Replace(html, "");
-//var lines = new Regex("<(.*?)>").Split(html).Where(p => p.Length > 0);
-List<string> lines = new List<string>();
-lines.Add("div id=\"mali\" class=\"j\" ");
+var html = await Load("https://forum.netfree.link/category/1/%D7%94%D7%9B%D7%A8%D7%96%D7%95%D7%AA");
+var cleanHtml = new Regex("//s").Replace(html, "");
+var lines = new Regex("<(.*?)>").Split(html).Where(p => p.Length > 0);
 HtmlElement root = new HtmlElement();
 HtmlElement current = root;
 foreach (var line in lines)
@@ -20,13 +18,14 @@ foreach (var line in lines)
     if (index >= 0)
     {
          InnerName = line.Substring( 0,index);
-        Console.WriteLine(InnerName);
+        //Console.WriteLine(InnerName);
     }
     if (InnerName == "/html")
         break;
     if (InnerName == "/")
     {
-        current = current.Parent;
+        if(current.Parent!=null)
+            current = current.Parent;
     }
     else if (HtmlHelper.Instance.HtmlTags.Contains(InnerName) || HtmlHelper.Instance.HtmlVoidTags.Contains(InnerName))
     {
@@ -41,30 +40,35 @@ foreach (var line in lines)
         var Id = newElement.Attributes.Where(c => c.Remove(2) == "id").FirstOrDefault();
         if (Id != null)
         {
-            Console.WriteLine(Id);
             newElement.Id = Id.Substring(4, Id.Length - 5);
         }
+        if(current!=null)
+        {
+            current.Children.Add(newElement);
+            newElement.Parent = current;
+
+        }
+        else { root=newElement; }
+        current= newElement;
         if (!(HtmlHelper.Instance.HtmlVoidTags.Contains(InnerName) || line[line.Length - 1] == '/'))
         {
-                current = newElement;
+            if(current.Parent!=null)
+                current = current.Parent;
         }
-
         current.Children.Add(newElement);
-         Console.WriteLine(newElement);
     }
-    else
+    else if(current!=null)
     {
         current.InnerHtml += line;
     }
-}  
+}
 
-Selector root2 = Selector.ConvertToSelecctor("");
-//printSelector(root);
+Selector root2 = Selector.ConvertToSelecctor("div#content");
+Console.WriteLine(root2);
 HashSet<HtmlElement> result = new HashSet<HtmlElement>();
 result = root.FindElementsBySelector(root2);
-//await Console.Out.WriteLineAsync("------res--------");
 Console.WriteLine(result.Count());
-result.ToList().ForEach(r => Console.WriteLine(r.ToString()));
+//result.ToList().ForEach(r => Console.WriteLine(r.ToString()));
 async Task<string> Load(string url)
 {
     HttpClient client = new HttpClient();

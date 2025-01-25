@@ -98,7 +98,23 @@ namespace lesson2
         }
         public override string ToString()
         {
-            return Name+" "+Id+" "+Classes[0];
+            string str = $"id: {Id} name:{Name} innerHtml:{InnerHtml} classes:";
+            //foreach (var c in Classes)
+            //{
+            //    str += "class: " + c;
+            //}
+            //str += $"\n attributes: ";
+            //foreach (var a in Attributes)
+            //{
+            //    str += "attribute: " + a;
+            //}
+            //str += $"\n children: ";
+            //foreach (var c in Children)
+            //{
+            //    str += "child: " + c;
+            //}
+            str += $"parent: {Parent} ";
+            return str;
         }
     }
 }
